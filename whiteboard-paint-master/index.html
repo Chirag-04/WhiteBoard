@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Canvas paint</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+	<style>
+		/*
+		* Prefixed by https://autoprefixer.github.io
+		* PostCSS: v8.4.14,
+		* Autoprefixer: v10.4.7
+		* Browsers: last 4 version
+		*/
+
+		.canvas-wraper {
+			margin: 0 auto;
+			background: white;
+			background: url(https://picsum.photos/600);
+			background-size: cover;
+			overflow: hidden;
+			max-height: 100vh;
+			/* height: 100vh; */
+			/* max-width: 100vw; */
+		}
+
+		canvas {
+			border: 20px solid #e84500;
+			border-radius: 10px;
+			background: white;
+			display: block;
+			overflow: hidden;
+			cursor: crosshair;
+			-webkit-box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+			box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			-ms-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+			z-index: 2;
+		}
+
+		.color-box {
+			background: #fff;
+			-webkit-box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+			box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+			position: absolute;
+			right: 0;
+			top: 10px;
+			display: -webkit-inline-box;
+			display: -ms-inline-flexbox;
+			display: inline-flex;
+			-webkit-box-align: center;
+			-ms-flex-align: center;
+			align-items: center;
+			-webkit-box-pack: center;
+			-ms-flex-pack: center;
+			justify-content: center;
+			padding: 3px 7px;
+			font-size: 18px;
+			text-align: center;
+		}
+
+		/* .canvas-settings-panel {
+			position: absolute;
+			right: 2px;
+			top: 5px;
+			overflow: hidden;
+		} */
+
+		.canvas-settings-panel {
+			position: fixed;
+			right: 2px;
+			top: 5px;
+			z-index: 3;
+		}
+
+		.canvas-settings-panel h4 {
+			margin: 0 4px 5px 0;
+			text-shadow: 1px 1px 2px #fff, 0 0 1em #fff, 0 0 0.2em #fff;
+			font-size: 20px;
+		}
+
+		.buttons-area {
+			position: relative;
+			right: -100px;
+			z-index: 3;
+			-webkit-transition: all 0.3s;
+			-o-transition: all 0.3s;
+			transition: all 0.3s;
+		}
+
+		.buttons-area.active {
+			right: 0;
+		}
+
+		button {
+			display: block;
+			padding: 6px 14px;
+			border-radius: 6px;
+			border: none;
+			color: #fff;
+			background: -webkit-gradient(linear, left top, left bottom, from(#4B91F7), to(#367AF6));
+			background: -o-linear-gradient(top, #4B91F7 0%, #367AF6 100%);
+			background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+			background-origin: border-box;
+			-webkit-box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+			box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+			cursor: pointer;
+			margin-bottom: 12px;
+			margin-right: auto;
+			margin-left: auto;
+		}
+
+		button.tools {
+			font-size: 20px;
+		}
+
+		button.color {
+			padding: 4px 4px;
+		}
+
+		button.color input {
+			width: 33px;
+			height: 25px;
+			border: 0;
+			padding: 0;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+
+		button.draw {
+			position: relative;
+		}
+
+		button.draw .size {
+			position: absolute;
+			right: -100vw;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 100px;
+			margin-right: 4px;
+			color: #222;
+			opacity: 0;
+			transition: opacity .3s;
+		}
+		.buttons-area.active button.draw.open .size {
+			opacity: 1;
+			right: 100%;
+		}
+
+		button.draw input {
+			width: 100%;
+			box-sizing: border-box;
+			border: none;
+			border-radius: none;
+			padding: 0;
+			margin: 0;
+		}
+
+	</style>
+</head>
+
+<body>
+	<div class="canvas-wraper">
+		<canvas id="canvas-board"></canvas>
+		<div class="canvas-settings-panel">
+			<!-- <h4>Tools</h4> -->
+			<button class="tools" title="Tools"><i class="fa-solid fa-tools"></i></button>
+			<div class="buttons-area">
+				<button class="color" title="Select Brush Color"><input type="color" id="colorpicker"
+						value="#00000"></button>
+				<button class="draw" title="Draw"><i class="fa-solid fa-paintbrush"></i>
+					<div class="size">
+						<span class="size-text">4</span>
+						<input type="range" value="4" min="1" max="50">
+					</div>
+				</button>
+				<button class="eraser" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
+				<button class="reset" title="Reset"><i class="fa-solid fa-rotate"></i></button>
+				<button class="download" title="Download"><i class="fa-solid fa-download"></i></button>
+			</div>
+		</div>
+	</div>
+	<script src="main.js"></script>
+</body>
+
+</html>
